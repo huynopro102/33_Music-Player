@@ -127,10 +127,13 @@
     background-color: var(--primary-color);
     cursor: pointer;
   }
+  .progress:hover {
+    cursor: pointer;
+  }
   
   /* PLAYLIST */
   .playlist {
-    margin-top: 408px;
+    margin-top: 430px;
     padding: 12px;
   }
   
@@ -143,10 +146,10 @@
     border-radius: 5px;
     box-shadow: 0 2px 3px rgba(0, 0, 0, 0.1);
   }
-  .active {
-    background-color: var(--primary-color);
+ .active{
 
-  }
+    color:var(--primary-color)
+ }
   .song.active {
     background-color: var(--primary-color);
   }
@@ -189,4 +192,23 @@
     color: #999;
     font-size: 18px;
   }
-  
+   /* time  */
+   .controlTime {
+     display:flex;
+     justify-content: space-between;
+   } 
+
+   /* volume */
+   .container{
+    display: flex;
+   }
+   .iconvolume{
+    position: relative;
+
+    
+  }
+  .progressVolume{
+     position: absolute;
+     left: 40px;
+   
+   }

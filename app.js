@@ -22,13 +22,23 @@ const nextbtn = document.querySelector('.btn-next')
 const prevbtn = document.querySelector('.btn-prev')
 const randombtn = document.querySelector('.btn-random')
 const repectbtn = document.querySelector('.btn-repeat')
-console.log(repectbtn)
+const currentTime = document.querySelector('.currentTime')
+const durationTime = document.querySelector('.durationTime')
+const progressVolume = document.querySelector('.progressVolume')
+const iconVolume = document.querySelector('.iconvolume')
+const playlist = document.querySelector('.playlist')
+
+
+
+console.log(playlist)
 
 const app = {
     CurrentIndex: 0,
     isPlaying: false,
     isRandom: false,
-    isRepeat:false , 
+    isRepeat: false,
+    isCurrentVolume: 1.0,
+    isSpace :false ,
     songs: [
         {
             name: '24h',
@@ -67,7 +77,7 @@ const app = {
             image: './images/pho_cu_con_anh.jpg'
         },
         {
-            name: 'anh đất cần gì nhiều ngoài em',
+            name: 'anh Đếch cần gì nhiều ngoài em',
             singer: 'đen vâu',
             path: './music/Đen - Anh Đếch Cần Gì Nhiều Ngoài Em ft. Vũ., Thành Đồng (M-V).mp3',
             image: './images/anh_dat_can_gi_nhieu_ngoai_em.jpg'
@@ -84,26 +94,27 @@ const app = {
             path: './music/Yêu Là _Tha Thu_ _ Only C _ Em Chưa 18 OST _ Official Music Video.mp3',
             image: './images/yeu_la_tha_thu.jpeg'
         },
-      
-      
-      
+
+
+
     ],
 
     render: function () {
-        const htmls = this.songs.map(function (song, index) {
+        const htmls = this.songs.map((song, index) => {
             return `
-            <div class="song ${index === this.CurrentIndex ? 'active' : '' } ">
-            <div class="thumb" style="background-image: url('${song.image}')">
-            </div>
-            <div class="body">
-              <h3 class="title">${song.name}</h3>
-              <p class="author">${song.singer}</p>
-            </div>
-            <div class="option">
-              <i class="fas fa-ellipsis-h"></i>
-            </div>
-          </div>
-            `
+                <div class="song ${index == this.CurrentIndex ? 'active' : ''} " indexSong='${index}' >
+                <div class="thumb" style="background-image: url('${song.image}')">
+                </div>
+                <div class="body">
+                  <h3 class="title">${song.name}</h3>
+                  <p class="author">${song.singer}</p>
+                </div>
+                <div class="option">
+                  <i class="fas fa-ellipsis-h"></i>
+                </div>
+              </div>
+                `
+
         })
         document.querySelector('.playlist').innerHTML = htmls.join('')
     },
@@ -120,12 +131,11 @@ const app = {
         const _this = this
 
         // xu ly cd quay va dung
-        const cdthumbanimate =  CdThumb.animate([
-            { transform:'rotate(360deg)'}
-        ],{
-            // quy như thế nào 
-            duration:10000 , // 10 seconds
-            iterations: Infinity ,
+        const cdthumbanimate = CdThumb.animate([
+            { transform: 'rotate(360deg)' }
+        ], {
+            duration: 10000,
+            iterations: Infinity,
 
         })
         cdthumbanimate.pause()
@@ -139,90 +149,151 @@ const app = {
             cd.style.opacity = widthnew / widthcd
         }
 
-        // xu ly khi click play
+        // click play
         playbtn.onclick = function () {
             if (_this.isPlaying) {
                 audio.pause()
             } else {
                 audio.play()
+
             }
         }
-        // khi bai hat dc play 
+        // khi bài hát được play
         audio.onplay = function () {
             _this.isPlaying = true
             player.classList.add('playing')
             cdthumbanimate.play()
 
+            setTimeout(() => {
+                let getTimeDuration = _this.timRunSongs(audio.duration)
+                durationTime.textContent = getTimeDuration
+            }, 500);
+            setTimeout(() => {
+                let getTimeDuration = _this.timRunSongs(audio.duration)
+                durationTime.textContent = getTimeDuration
+            }, 400);
+            setTimeout(() => {
+                let getTimeDuration = _this.timRunSongs(audio.duration)
+                durationTime.textContent = getTimeDuration
+            }, 300);
+            setTimeout(() => {
+                let getTimeDuration = _this.timRunSongs(audio.duration)
+                durationTime.textContent = getTimeDuration
+            }, 200);
+            setTimeout(() => {
+                let getTimeDuration = _this.timRunSongs(audio.duration)
+                durationTime.textContent = getTimeDuration
+            }, 100);
+            setTimeout(() => {
+                let getTimeDuration = _this.timRunSongs(audio.duration)
+                durationTime.textContent = getTimeDuration
+            }, 50);
+
+            setInterval(function () {
+                const gettime = _this.timRunSongs(audio.currentTime)
+                currentTime.textContent = gettime
+            }, 500);
+
         }
-        // khi song bi pause
+        // khi bài hát bị pause
         audio.onpause = function () {
             _this.isPlaying = false
             player.classList.remove('playing')
             cdthumbanimate.pause()
-        } 
 
-        // khi tien do bai  hat thay doi
-        // khi nghe xem ở 1 nơi events , còn lấy giá trị thì xem ở properties , còn 1 hành động thì xem ở method
-
-        audio.ontimeupdate = function(){
-            if(audio.duration){
-                const progressPercent = audio.currentTime/audio.duration*100
-                progress.value = progressPercent
-            }
-           
         }
 
-        // xu ly khi tua song
-        progress.onchange = function(e){        
-            const seekTime = audio.duration/ 100 * e.target.value
+        // tiến độ của bài hát
+        audio.ontimeupdate = function () {
+            if (audio.duration) {
+                const progressPercent = audio.currentTime / audio.duration * 100
+                progress.value = progressPercent
+            }
+        }
+
+        // khi tua (seek) bài hát
+        progress.oninput = function (e) {
+            const seekTime = audio.duration / 100 * e.target.value
             audio.currentTime = seekTime
         }
 
         // click btnNext
-        nextbtn.onclick = function(){
-            if(_this.isRandom){
+        nextbtn.onclick = function () {
+
+            if (_this.isRandom) {
                 _this.playRandomSong()
-            }else{
+            } else {
                 _this.nextSong()
             }
             audio.play()
+            _this.render()
         }
-        
+
         // click btnprev
-        prevbtn.onclick = function(){
-            if(_this.isRandom){
+        prevbtn.onclick = function () {
+
+            if (_this.isRandom) {
                 _this.playRandomSong()
-            }else{
+            } else {
                 _this.prevSong()
             }
             audio.play()
+            _this.render()
         }
 
-        // click random / bat tat
-        randombtn.onclick = function(){
-            _this.isRandom = !_this.isRandom
-            randombtn.classList.toggle("active",_this.isRandom)
-  
+        // click random 
+        randombtn.onclick = function () { 
+          let btnRandom =   randombtn.classList.toggle("active", !_this.isRandom)
+            _this.isRandom = btnRandom
+            console.log(_this.isRandom)
         }
-         
+
 
         // xử lý khi audio ended
-        audio.onended = function(){
-            if(repectbtn){
+        audio.onended = function () {
+            console.log(_this.isRepeat)
+            console.log(_this.isRandom)
+            if (_this.isRepeat ) {
                 audio.play()
-            }else{
-
-                nextbtn.click()
+            } else {
+                if(_this.isRandom){
+                    _this.playRandomSong()
+                    audio.play()
+                    _this.render()
+                }else{
+                    _this.isRepeat = false
+                    nextbtn.click()
+                }
             }
+       
+          
             // chức năng chánh lặp lại các bài hát
-            
+
         }
 
-        // xử lý lặp lại 1 bài hát
-        repectbtn.onclick = function(e){
-            _this.isRepeat = !_this.isRepeat
-            repectbtn.classList.toggle("active",_this.isRepeat)
+        // click btn repeat
+        repectbtn.onclick = function (e) {  
+            let statusbtnRepeat = repectbtn.classList.toggle("active",!_this.isRepeat)
+            _this.isRepeat = statusbtnRepeat
         }
+
+       
+        // click vào song để play song
+        // playlist.onclick = function (e) {
+        //     const elementActive = e.target.closest('.song:not(.active)')
+        //     if (elementActive || e.target.closest('.option')) {
+
+        //         if (elementActive) {
+                   
+        //         }
+
+        //         if (e.target.closest('.option')) {
+
+        //         }
+
+        //     }
+        // }
+
 
     },
 
@@ -233,32 +304,72 @@ const app = {
 
     },
 
-    nextSong: function(){
-        this.CurrentIndex ++
-        if(this.CurrentIndex >= this.songs.length){
-            this.CurrentIndex = 0 
+    nextSong: function () {
+        this.CurrentIndex++
+        if (this.CurrentIndex >= this.songs.length) {
+            this.CurrentIndex = 0
         }
         this.loadCurrentSong()
-    }  ,
-    prevSong: function(){
-        this.CurrentIndex --
-        if(this.CurrentIndex < 0){
-            this.CurrentIndex = this.songs.length -1
-            console.log(current)
-        }
-        this.loadCurrentSong()
-    }  ,
+    },
+    prevSong: function () {
+        this.CurrentIndex--
+        if (this.CurrentIndex < 0) {
+            this.CurrentIndex = this.songs.length - 1
 
-    playRandomSong: function(){
+        }
+        this.loadCurrentSong()
+    },
+
+    playRandomSong: function () {
         let newIndex
-        // 4 0.1 =
-        do{
-            newIndex =  Math.floor( Math.random()* this.songs.length)
-        }while(newIndex === this.CurrentIndex  )
+        do {
+            newIndex = Math.floor(Math.random() * this.songs.length)
+        } while (newIndex === this.CurrentIndex)
         this.CurrentIndex = newIndex
         this.loadCurrentSong()
-    } ,
- 
+    },
+
+    timRunSongs: function (x) {
+        const sophut = Math.floor(x / 60)
+        const sogiay = Math.ceil(x - (sophut * 60))
+        const tong = `${sophut}:${sogiay < 10 ? '0' + sogiay : sogiay}`
+        return tong
+    },
+    setVolume: function () {
+        progressVolume.value = this.isCurrentVolume
+        progressVolume.oninput = function () {
+            audio.volume = progressVolume.value
+            console.log(progressVolume.value)
+            console.log(iconVolume)
+            if (progressVolume.value == 0) {
+                iconVolume.children[0].classList.add('fa-volume-xmark')
+                iconVolume.children[0].classList.remove('fa-volume-off')
+                iconVolume.children[0].classList.remove('fa-volume-low')
+                iconVolume.children[0].classList.remove('fa-volume-high')
+            }
+            if (progressVolume.value == 0.7 || progressVolume.value == 0.8 || progressVolume.value == 0.9 || progressVolume.value == 1.0) {
+                iconVolume.children[0].classList.add('fa-volume-high')
+                iconVolume.children[0].classList.remove('fa-volume-xmark')
+                iconVolume.children[0].classList.remove('fa-volume-low')
+                iconVolume.children[0].classList.remove('fa-volume-off')
+            }
+            if (progressVolume.value == 0.1 || progressVolume.value == 0.2 || progressVolume.value == 0.3) {
+                iconVolume.children[0].classList.add('fa-volume-off')
+                iconVolume.children[0].classList.remove('fa-volume-xmark')
+                iconVolume.children[0].classList.remove('fa-volume-low')
+                iconVolume.children[0].classList.remove('fa-volume-high')
+            }
+            if (progressVolume.value == 0.4 || progressVolume.value == 0.5 || progressVolume.value == 0.6) {
+                iconVolume.children[0].classList.add('fa-volume-low')
+                iconVolume.children[0].classList.remove('fa-volume-xmark')
+                iconVolume.children[0].classList.remove('fa-volume-off')
+                iconVolume.children[0].classList.remove('fa-volume-high')
+            }
+        }
+    },
+
+
+
     start: function () {
         // dinh nghia cac object
         this.defineProperties()
@@ -272,17 +383,15 @@ const app = {
         // render playlist
         this.render()
 
+        // thay đổi giá trị của volume
+        this.setVolume()
+
+
+
     },
 }
 
 
 app.start()
-
-console.log( (4*0.2)*10 )
-
-
-
-
-
 
 
