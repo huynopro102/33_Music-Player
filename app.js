@@ -167,7 +167,7 @@ const app = {
             setInterval(()=>{
                 let getTimeDuration = _this.timRunSongs(audio.duration)
                 durationTime.textContent = getTimeDuration
-            },1000)
+            },500)
            
             setInterval(function () {
                 const gettime = _this.timRunSongs(audio.currentTime)
